@@ -20,6 +20,7 @@
     --label: #6A6A6A;
     --accent: #F7931A;
     --line: #1E1E1E;
+    --flash: #17120A;
     --up: #4CAF64;
     --down: #E0523C;
     --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -83,7 +84,6 @@
     position: sticky;
     top: 0;
     z-index: 20;
-    height: 56px;
     background: var(--bg);
     border-bottom: 1px solid var(--accent);
   }
@@ -92,8 +92,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
   }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .wordmark {
     font-size: 14px;
     font-weight: 500;
@@ -101,6 +102,17 @@
     text-transform: uppercase;
     white-space: nowrap;
   }
+  .dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    background: var(--label);
+  }
+  .dot.live { background: var(--up); animation: blip 2.4s ease-in-out infinite; }
+  .dot.dead { background: var(--down); }
+  @keyframes blip { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  .right { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .ticker {
     font-family: var(--mono);
     font-variant-numeric: tabular-nums;
@@ -112,12 +124,71 @@
   }
   .ticker b { color: var(--ink); font-weight: 400; }
   .ticker .sats { color: var(--accent); }
+  .xlink {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--mute);
+    border: 1px solid var(--line);
+    transition: color 0.18s linear, border-color 0.18s linear;
+  }
+  .xlink:hover { color: var(--ink); border-color: var(--accent); text-decoration: none; }
+  .xlink svg { width: 13px; height: 13px; display: block; }
+
+  /* ---------- tape ---------- */
+  .tape {
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .tape-track {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    width: max-content;
+    white-space: nowrap;
+    animation: marquee 60s linear infinite;
+    will-change: transform;
+  }
+  .tape:hover .tape-track { animation-play-state: paused; }
+  @keyframes marquee { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+  .ti {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    padding: 0 18px;
+    border-right: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .ti i {
+    font-style: normal;
+    letter-spacing: 0.12em;
+    color: var(--label);
+    margin-right: 8px;
+  }
+  .ti b { font-weight: 400; }
+  .ti b.up { color: var(--up); }
+  .ti b.down { color: var(--down); }
+  .prog { height: 1px; background: var(--line); overflow: hidden; }
+  .prog i { display: block; height: 1px; width: 0; background: var(--accent); }
+  .prog.run i { animation: fill 15s linear 1 forwards; }
+  @keyframes fill { from { width: 0; } to { width: 100%; } }
 
   /* ---------- sections ---------- */
   .band { padding: 40px 0; }
   .band + .band > .wrap { border-top: 1px solid var(--line); }
   .band + .band { padding-top: 0; }
   .band + .band > .wrap > .inner { padding-top: 40px; }
+
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+  }
+  .reveal.in { opacity: 1; transform: none; }
 
   /* ---------- hero ---------- */
   .hero-line {
@@ -128,6 +199,10 @@
     word-break: break-word;
   }
   .hero-line .n { color: var(--accent); }
+  .hero-line .n.wait { color: var(--label); animation: breathe 1.5s ease-in-out infinite; }
+  .hero-line .n.pop { animation: pop 0.6s ease-out; }
+  @keyframes pop { 0% { opacity: 0.45; } 100% { opacity: 1; } }
+  @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
   .hero-line.fail {
     font-size: 24px;
     letter-spacing: -0.01em;
@@ -135,20 +210,23 @@
     color: var(--mute);
   }
 
-  .strip {
-    margin-top: 28px;
+  /* ---------- value grids ---------- */
+  .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     border: 1px solid var(--line);
   }
-  .cell {
+  .strip { margin-top: 28px; }
+  .grid > .cell {
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
     border-right: 1px solid var(--line);
     min-width: 0;
   }
-  .cell:nth-child(2n) { border-right: 0; }
-  .cell:nth-last-child(-n+2) { border-bottom: 0; }
+  .grid > .cell:nth-child(2n) { border-right: 0; }
+  .grid > .cell:nth-last-child(-n+2) { border-bottom: 0; }
+  .cell.tick { animation: cellflash 0.75s ease-out; }
+  @keyframes cellflash { 0% { background: var(--flash); } 100% { background: transparent; } }
   .cell .v {
     margin-top: 6px;
     font-family: var(--mono);
@@ -162,6 +240,7 @@
   }
   .v.up { color: var(--up); }
   .v.down { color: var(--down); }
+  .v.wait { color: var(--label); animation: breathe 1.5s ease-in-out infinite; }
 
   /* ---------- two column bands ---------- */
   .cols { display: grid; gap: 32px; }
@@ -191,6 +270,7 @@
   }
   .addr-line .a { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .addr-line .a.empty { color: var(--mute); }
+  .addr-line .a.set { animation: pop 0.6s ease-out; }
   .addr-acts { margin-left: auto; display: flex; gap: 12px; white-space: nowrap; }
   .addr-acts button, .addr-acts a {
     font-family: var(--mono);
@@ -198,9 +278,12 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--mute);
+    transition: color 0.15s linear;
   }
-  .addr-acts button:hover { color: var(--ink); }
+  .addr-acts button:hover, .addr-acts a:hover { color: var(--ink); }
   .addr-acts [hidden] { display: none; }
+
+  .sub { margin-top: 12px; font-size: 12px; line-height: 1.6; color: var(--label); }
 
   /* ---------- ledger ---------- */
   .note { color: var(--mute); margin-bottom: 16px; max-width: 60em; }
@@ -239,6 +322,8 @@
     white-space: normal;
     text-align: left;
   }
+  tbody tr.rowin { animation: rowin 0.5s ease-out both; }
+  @keyframes rowin { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
 
   /* ---------- receipt ---------- */
   .prose { font-size: 15px; line-height: 1.7; max-width: 34em; }
@@ -262,44 +347,65 @@
     .hero-line { font-size: 84px; }
     .hero-line.fail { font-size: 40px; }
     .strip { grid-template-columns: repeat(4, 1fr); margin-top: 36px; }
-    .cell { border-bottom: 0; padding: 16px 20px; }
-    .cell:nth-child(2n) { border-right: 1px solid var(--line); }
-    .cell:last-child { border-right: 0; }
+    .strip > .cell { border-bottom: 0; padding: 16px 20px; }
+    .strip > .cell:nth-child(2n) { border-right: 1px solid var(--line); }
+    .strip > .cell:last-child { border-right: 0; }
     .cols { grid-template-columns: 60fr 40fr; gap: 48px; }
     .cols.even { grid-template-columns: 1fr 1fr; }
     table { min-width: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001s !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001s !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+    .tape-track { animation: none; }
   }
 </style>
 </head>
 <body>
   <header>
     <div class="wrap bar">
-      <div class="wordmark">SATS</div>
-      <div class="ticker" id="ticker" aria-live="polite"></div>
+      <div class="brand">
+        <span class="dot" id="dot" title="price feed"></span>
+        <span class="wordmark">SATS</span>
+      </div>
+      <div class="right">
+        <div class="ticker" id="ticker" aria-live="polite"></div>
+        <a class="xlink" href="https://x.com/SatsOnRH" target="_blank" rel="noopener noreferrer" aria-label="SATS on X">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
     </div>
   </header>
+
+  <div class="tape" aria-hidden="true"><div class="tape-track" id="tapeTrack"></div></div>
+  <div class="prog" id="prog"><i></i></div>
 
   <main>
     <section class="band">
       <div class="wrap">
-        <div class="inner">
-          <h1 class="hero-line" id="hero" aria-live="polite"></h1>
-          <div class="strip">
+        <div class="inner reveal">
+          <h1 class="hero-line" id="hero" aria-live="polite">$1 = <span class="n wait" id="heroN">&mdash;</span> sats</h1>
+          <div class="grid strip">
             <div class="cell">
               <div class="label">BTC / USD</div>
-              <div class="v" id="s-btc">—</div>
+              <div class="v wait" id="s-btc">&mdash;</div>
             </div>
             <div class="cell">
               <div class="label">24H</div>
-              <div class="v" id="s-24h">—</div>
+              <div class="v wait" id="s-24h">&mdash;</div>
             </div>
             <div class="cell">
               <div class="label">1 sat</div>
-              <div class="v" id="s-sat">—</div>
+              <div class="v wait" id="s-sat">&mdash;</div>
             </div>
             <div class="cell">
               <div class="label">Sats per dollar</div>
-              <div class="v" id="s-per">—</div>
+              <div class="v wait" id="s-per">&mdash;</div>
             </div>
           </div>
         </div>
@@ -308,7 +414,7 @@
 
     <section class="band">
       <div class="wrap">
-        <div class="inner cols">
+        <div class="inner cols reveal">
           <div class="mech">
             <p>SATS is a token on Pons paired with cbBTC.</p>
             <p>Creator fees on the pair are withdrawn in cbBTC.</p>
@@ -319,7 +425,7 @@
             <div class="addr-row" id="row-token">
               <div class="k">Token</div>
               <div class="addr-line">
-                <span class="a empty" id="a-token">—</span>
+                <span class="a empty" id="a-token">&mdash;</span>
                 <span class="addr-acts">
                   <button type="button" id="c-token" hidden>copy</button>
                   <a id="l-token" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
@@ -329,7 +435,7 @@
             <div class="addr-row" id="row-pair">
               <div class="k">Pair</div>
               <div class="addr-line">
-                <span class="a empty" id="a-pair">—</span>
+                <span class="a empty" id="a-pair">&mdash;</span>
                 <span class="addr-acts">
                   <button type="button" id="c-pair" hidden>copy</button>
                   <a id="l-pair" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
@@ -339,7 +445,7 @@
             <div class="addr-row" id="row-fee">
               <div class="k">Creator fee</div>
               <div class="addr-line">
-                <span class="a empty" id="a-fee">—</span>
+                <span class="a empty" id="a-fee">&mdash;</span>
                 <span class="addr-acts">
                   <button type="button" id="c-fee" hidden>copy</button>
                   <a id="l-fee" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
@@ -353,7 +459,58 @@
 
     <section class="band">
       <div class="wrap">
-        <div class="inner">
+        <div class="inner cols even reveal">
+          <div>
+            <div class="label" style="margin-bottom:16px">SATS / cbBTC</div>
+            <div class="grid">
+              <div class="cell">
+                <div class="label">Price</div>
+                <div class="v wait" id="p-usd">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">24H</div>
+                <div class="v wait" id="p-chg">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">Price in sats</div>
+                <div class="v wait" id="p-sats">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">Volume 24H</div>
+                <div class="v wait" id="p-vol">&mdash;</div>
+              </div>
+            </div>
+            <p class="sub" id="p-note">reading the pair from chain</p>
+          </div>
+          <div>
+            <div class="label" style="margin-bottom:16px">Bitcoin network</div>
+            <div class="grid">
+              <div class="cell">
+                <div class="label">Block</div>
+                <div class="v wait" id="n-blk">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">Fee sat/vB</div>
+                <div class="v wait" id="n-fee">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">Mempool</div>
+                <div class="v wait" id="n-mem">&mdash;</div>
+              </div>
+              <div class="cell">
+                <div class="label">Blocks to halving</div>
+                <div class="v wait" id="n-halv">&mdash;</div>
+              </div>
+            </div>
+            <p class="sub">The unit this token is named after is defined here: one hundred millionth of one bitcoin.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="inner reveal">
           <div class="label" style="margin-bottom:16px">Fee routing</div>
           <p class="note">Creator fees on the SATS/cbBTC pair are withdrawn in cbBTC. Every withdrawal appears below.</p>
           <div class="scroller">
@@ -367,7 +524,7 @@
                 </tr>
               </thead>
               <tbody id="routes">
-                <tr class="empty"><td colspan="4">no routings yet — this table is read from chain</td></tr>
+                <tr class="empty"><td colspan="4">no routings yet &mdash; this table is read from chain</td></tr>
               </tbody>
             </table>
           </div>
@@ -377,7 +534,7 @@
 
     <section class="band">
       <div class="wrap">
-        <div class="inner cols even">
+        <div class="inner cols even reveal">
           <div>
             <div class="label" style="margin-bottom:16px">Receipt</div>
             <p class="prose">
@@ -392,7 +549,7 @@
             <div class="who">ribuck</div>
             <div class="when">10 February 2011</div>
             <div class="said">"I like 'austrian' and 'satoshi' as possible nicknames"</div>
-            <div class="src">bitcointalk.org — thread 3311</div>
+            <div class="src">bitcointalk.org &mdash; thread 3311</div>
           </div>
         </div>
       </div>
@@ -415,11 +572,18 @@
   var TOPIC_LAUNCHED = "0x8d4aad4953d0ca700d468f3753aa14432d1b35b43ec6409f051fb6aa43a89607";
   var TOPIC_RECIPIENT = "0x308c390ed1ab5873392818e036cabdf408bc8ad042fbaead3108954ff75ba980";
   var DASH = "\u2014";
+  var HALVING = 210000;
+
+  var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   var $ = function (id) { return document.getElementById(id); };
   var hero = $("hero");
+  var heroN = $("heroN");
   var ticker = $("ticker");
   var routes = $("routes");
+  var dot = $("dot");
+  var prog = $("prog");
+  var tapeTrack = $("tapeTrack");
 
   function isAddr(a) { return /^0x[a-fA-F0-9]{40}$/.test(a || ""); }
 
@@ -446,17 +610,20 @@
     return "0x" + addr.replace(/^0x/i, "").toLowerCase().padStart(64, "0");
   }
 
-  async function getJson(url) {
+  async function getRes(url) {
     var ctl = new AbortController();
     var t = setTimeout(function () { ctl.abort(); }, 10000);
     try {
-      var res = await fetch(url, { signal: ctl.signal, headers: { Accept: "application/json" } });
+      var res = await fetch(url, { signal: ctl.signal });
       if (!res.ok) throw new Error(String(res.status));
-      return await res.json();
+      return res;
     } finally {
       clearTimeout(t);
     }
   }
+
+  async function getJson(url) { return (await getRes(url)).json(); }
+  async function getText(url) { return (await getRes(url)).text(); }
 
   function posNum(v) {
     var n = typeof v === "number" ? v : parseFloat(v);
@@ -466,6 +633,137 @@
   function anyNum(v) {
     var n = typeof v === "number" ? v : parseFloat(v);
     return Number.isFinite(n) ? n : null;
+  }
+
+  /* ---------- animation helpers ---------- */
+
+  function restart(el, cls) {
+    if (reduced || !el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+  }
+
+  function tween(el, to, fmt) {
+    var prev = el.getAttribute("data-v");
+    var from = prev == null ? NaN : Number(prev);
+    el.setAttribute("data-v", String(to));
+    if (reduced || !Number.isFinite(from) || from === to) {
+      el.textContent = fmt(to);
+      return;
+    }
+    var seq = (Number(el.getAttribute("data-seq")) || 0) + 1;
+    el.setAttribute("data-seq", String(seq));
+    var t0 = 0;
+    function step(now) {
+      if (Number(el.getAttribute("data-seq")) !== seq) return;
+      if (!t0) t0 = now;
+      var p = Math.min(1, (now - t0) / 650);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = fmt(to);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* value cells: text set + flash of the enclosing cell on change */
+
+  function cellOf(el) {
+    var p = el;
+    while (p && !(p.classList && p.classList.contains("cell"))) p = p.parentElement;
+    return p;
+  }
+
+  function setV(id, text, cls) {
+    var el = $(id);
+    if (!el) return;
+    var changed = el.textContent !== text;
+    el.className = "v" + (cls ? " " + cls : "");
+    el.textContent = text;
+    if (changed && text !== DASH) restart(cellOf(el), "tick");
+  }
+
+  function setVNum(id, value, fmt, cls) {
+    var el = $(id);
+    if (!el) return;
+    var changed = Number(el.getAttribute("data-v")) !== value;
+    el.className = "v" + (cls ? " " + cls : "");
+    tween(el, value, fmt);
+    if (changed) restart(cellOf(el), "tick");
+  }
+
+  function waitV(id) {
+    var el = $(id);
+    if (!el) return;
+    el.className = "v wait";
+    el.removeAttribute("data-v");
+    el.textContent = DASH;
+  }
+
+  /* ---------- formatting ---------- */
+
+  function fmtUsd(n) {
+    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function fmtInt(n) {
+    return Math.round(n).toLocaleString("en-US");
+  }
+
+  function fmtSigned(n) {
+    return (n > 0 ? "+" : n < 0 ? "\u2212" : "") + Math.abs(n).toFixed(2) + "%";
+  }
+
+  function dirOf(n) { return n > 0 ? "up" : n < 0 ? "down" : ""; }
+
+  function fmtSmall(n) {
+    if (!Number.isFinite(n) || n <= 0) return null;
+    if (n >= 1000) return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+    if (n >= 1) return n.toFixed(4);
+    var d = Math.min(12, Math.max(4, -Math.floor(Math.log10(n)) + 4));
+    return n.toFixed(d);
+  }
+
+  function fmtCompact(n) {
+    if (!Number.isFinite(n)) return DASH;
+    var a = Math.abs(n);
+    if (a >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
+    if (a >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+    if (a >= 1e3) return "$" + (n / 1e3).toFixed(1) + "K";
+    return "$" + n.toFixed(2);
+  }
+
+  /* ---------- tape ---------- */
+
+  var TAPE = [
+    ["btc", "BTC/USD"],
+    ["chg", "BTC 24H"],
+    ["sats", "$1"],
+    ["sat", "1 SAT"],
+    ["pusd", "SATS"],
+    ["pchg", "SATS 24H"],
+    ["pvol", "VOL 24H"],
+    ["blk", "BLOCK"],
+    ["fee", "FEE"],
+    ["mem", "MEMPOOL"],
+    ["halv", "TO HALVING"],
+    ["upd", "UPDATED"]
+  ];
+
+  (function buildTape() {
+    var one = TAPE.map(function (it) {
+      return "<span class=\"ti\"><i>" + it[1] + "</i><b class=\"t-" + it[0] + "\">" + DASH + "</b></span>";
+    }).join("");
+    tapeTrack.innerHTML = one + one;
+  })();
+
+  function tapeSet(key, text, cls) {
+    var els = tapeTrack.querySelectorAll(".t-" + key);
+    for (var i = 0; i < els.length; i++) {
+      els[i].textContent = text;
+      els[i].className = "t-" + key + (cls ? " " + cls : "");
+    }
   }
 
   /* ---------- price ---------- */
@@ -501,25 +799,21 @@
     return null;
   }
 
-  function fmtUsd(n) {
-    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function setCell(id, text, cls) {
-    var el = $(id);
-    if (!el) return;
-    el.className = "v" + (cls ? " " + cls : "");
-    el.textContent = text;
-  }
-
   function showUnavailable() {
     hero.className = "hero-line fail";
     hero.textContent = "price feed unavailable";
     ticker.textContent = "price feed unavailable";
-    setCell("s-btc", DASH);
-    setCell("s-24h", DASH);
-    setCell("s-sat", DASH);
-    setCell("s-per", DASH);
+    dot.className = "dot dead";
+    prog.classList.remove("run");
+    waitV("s-btc");
+    waitV("s-24h");
+    waitV("s-sat");
+    waitV("s-per");
+    tapeSet("btc", DASH);
+    tapeSet("chg", DASH);
+    tapeSet("sats", DASH);
+    tapeSet("sat", DASH);
+    tapeSet("upd", "feed down");
   }
 
   function renderMarket(m) {
@@ -527,26 +821,39 @@
     var satUsd = m.price / 100000000;
     var satsText = sats.toLocaleString("en-US");
 
-    hero.className = "hero-line";
-    hero.innerHTML = "$1 = <span class=\"n\">" + esc(satsText) + "</span> sats";
+    if (hero.className !== "hero-line" || !$("heroN")) {
+      hero.className = "hero-line";
+      hero.innerHTML = "$1 = <span class=\"n\" id=\"heroN\">" + esc(satsText) + "</span> sats";
+      heroN = $("heroN");
+      heroN.setAttribute("data-v", String(sats));
+    } else {
+      heroN.className = "n";
+      tween(heroN, sats, fmtInt);
+      restart(heroN, "pop");
+    }
 
     ticker.innerHTML =
       "BTC <b>$" + esc(fmtUsd(m.price)) + "</b>" +
       " \u00b7 $1 = <b class=\"sats\">" + esc(satsText) + "</b> sats";
 
-    setCell("s-btc", "$" + fmtUsd(m.price));
+    dot.className = "dot live";
+    restart(prog, "run");
+
+    setVNum("s-btc", m.price, function (n) { return "$" + fmtUsd(n); });
     if (m.change == null) {
-      setCell("s-24h", DASH);
+      waitV("s-24h");
+      tapeSet("chg", DASH);
     } else {
-      setCell(
-        "s-24h",
-        (m.change > 0 ? "+" : m.change < 0 ? "\u2212" : "") +
-          Math.abs(m.change).toFixed(2) + "%",
-        m.change > 0 ? "up" : m.change < 0 ? "down" : ""
-      );
+      setVNum("s-24h", m.change, fmtSigned, dirOf(m.change));
+      tapeSet("chg", fmtSigned(m.change), dirOf(m.change));
     }
-    setCell("s-sat", "$" + satUsd.toFixed(8));
-    setCell("s-per", satsText);
+    setV("s-sat", "$" + satUsd.toFixed(8));
+    setVNum("s-per", sats, fmtInt);
+
+    tapeSet("btc", "$" + fmtUsd(m.price));
+    tapeSet("sats", satsText + " sats");
+    tapeSet("sat", "$" + satUsd.toFixed(8));
+    tapeSet("upd", new Date().toLocaleTimeString("en-GB", { hour12: false }));
   }
 
   async function tickPrice() {
@@ -556,6 +863,68 @@
       renderMarket(m);
     } catch (e) {
       showUnavailable();
+    }
+  }
+
+  /* ---------- bitcoin network feed ---------- */
+
+  async function tipHeight() {
+    try { return posNum(await getText("https://mempool.space/api/blocks/tip/height")); } catch (e) {}
+    try { return posNum(await getText("https://blockstream.info/api/blocks/tip/height")); } catch (e) {}
+    return null;
+  }
+
+  async function recFee() {
+    try {
+      var d = await getJson("https://mempool.space/api/v1/fees/recommended");
+      return posNum(d && d.halfHourFee);
+    } catch (e) {}
+    try {
+      var f = await getJson("https://blockstream.info/api/fee-estimates");
+      return posNum(f && f["3"]);
+    } catch (e) {}
+    return null;
+  }
+
+  async function mempoolCount() {
+    try {
+      var d = await getJson("https://mempool.space/api/mempool");
+      return posNum(d && d.count);
+    } catch (e) {}
+    return null;
+  }
+
+  async function tickNetwork() {
+    var height = await tipHeight();
+    if (height) {
+      setVNum("n-blk", height, fmtInt);
+      tapeSet("blk", fmtInt(height));
+      var left = HALVING - (height % HALVING);
+      setVNum("n-halv", left, fmtInt);
+      tapeSet("halv", fmtInt(left) + " blocks");
+    } else {
+      waitV("n-blk");
+      waitV("n-halv");
+      tapeSet("blk", DASH);
+      tapeSet("halv", DASH);
+    }
+
+    var fee = await recFee();
+    if (fee) {
+      setVNum("n-fee", fee, function (n) { return n.toFixed(n < 10 ? 1 : 0); });
+      tapeSet("fee", fee.toFixed(fee < 10 ? 1 : 0) + " sat/vB");
+    } else {
+      waitV("n-fee");
+      tapeSet("fee", DASH);
+    }
+
+    var count = await mempoolCount();
+    if (count) {
+      setVNum("n-mem", count, function (n) { return fmtInt(n) + " tx"; });
+      tapeSet("mem", fmtInt(count) + " tx");
+    } else {
+      waitV("n-mem");
+      tapeSet("mem", DASH);
     }
   }
 
@@ -575,6 +944,7 @@
     span.className = "a";
     span.textContent = midTrunc(address, 10, 8);
     span.title = address;
+    restart(span, "set");
     link.hidden = false;
     link.href = EXPLORER + "/" + path + "/" + address;
     btn.hidden = false;
@@ -586,7 +956,9 @@
     };
   }
 
-  async function discoverPair() {
+  /* ---------- pair feed ---------- */
+
+  async function searchPair() {
     try {
       var data = await getJson("https://api.dexscreener.com/latest/dex/search?q=SATS%20cbBTC");
       var pairs = data && Array.isArray(data.pairs) ? data.pairs : [];
@@ -600,11 +972,92 @@
       });
       if (hits.length) {
         hits.sort(function (a, b) { return (b.pairCreatedAt || 0) - (a.pairCreatedAt || 0); });
-        return { token: hits[0].baseToken.address, pair: hits[0].pairAddress || "" };
+        return hits[0];
       }
     } catch (e) {}
-    return { token: TOKEN, pair: "" };
+    return null;
   }
+
+  async function fetchPair() {
+    if (isAddr(PAIR)) {
+      try {
+        var d = await getJson("https://api.dexscreener.com/latest/dex/pairs/robinhood/" + PAIR);
+        var p = (d && d.pair) || (d && Array.isArray(d.pairs) ? d.pairs[0] : null);
+        if (p) return p;
+      } catch (e) {}
+    }
+    return await searchPair();
+  }
+
+  function renderPair(p) {
+    if (!p) {
+      $("p-note").textContent = "pair not found on chain yet";
+      waitV("p-usd");
+      waitV("p-chg");
+      waitV("p-sats");
+      waitV("p-vol");
+      tapeSet("pusd", DASH);
+      tapeSet("pchg", DASH);
+      tapeSet("pvol", DASH);
+      return;
+    }
+
+    $("p-note").textContent = "live from the SATS/cbBTC pair on Pons";
+
+    var usd = posNum(p.priceUsd);
+    if (usd) {
+      setV("p-usd", "$" + fmtSmall(usd));
+      tapeSet("pusd", "$" + fmtSmall(usd));
+    } else {
+      waitV("p-usd");
+      tapeSet("pusd", DASH);
+    }
+
+    var chg = p.priceChange ? anyNum(p.priceChange.h24) : null;
+    if (chg == null) {
+      waitV("p-chg");
+      tapeSet("pchg", DASH);
+    } else {
+      setVNum("p-chg", chg, fmtSigned, dirOf(chg));
+      tapeSet("pchg", fmtSigned(chg), dirOf(chg));
+    }
+
+    var native = posNum(p.priceNative);
+    if (native) {
+      var inSats = native * 100000000;
+      setV("p-sats", fmtSmall(inSats) + " sats");
+    } else {
+      waitV("p-sats");
+    }
+
+    var vol = p.volume ? anyNum(p.volume.h24) : null;
+    if (vol == null) {
+      waitV("p-vol");
+      tapeSet("pvol", DASH);
+    } else {
+      setVNum("p-vol", vol, fmtCompact);
+      tapeSet("pvol", fmtCompact(vol));
+    }
+  }
+
+  async function tickPair() {
+    var p = await fetchPair();
+    if (p) {
+      if (isAddr(p.pairAddress)) {
+        if (PAIR !== p.pairAddress) {
+          PAIR = p.pairAddress;
+          bindAddr("pair", PAIR, "address");
+        }
+      }
+      if (p.baseToken && isAddr(p.baseToken.address) && !isAddr(TOKEN)) {
+        TOKEN = p.baseToken.address;
+        bindAddr("token", TOKEN, "token");
+      }
+    }
+    renderPair(p);
+  }
+
+  /* ---------- chain discovery ---------- */
 
   async function getLogs(topic0, topic1) {
     var url = EXPLORER +
@@ -697,11 +1150,15 @@
     return price;
   }
 
+  var routesPainted = false;
+
   function renderRoutes(rows) {
     if (!rows.length) { emptyRoutes(); return; }
-    routes.innerHTML = rows.map(function (row) {
+    var animate = !routesPainted && !reduced;
+    routes.innerHTML = rows.map(function (row, i) {
       var href = EXPLORER + "/tx/" + row.hash;
-      return "<tr>" +
+      var attr = animate ? " class=\"rowin\" style=\"animation-delay:" + (i * 45) + "ms\"" : "";
+      return "<tr" + attr + ">" +
         "<td>" + esc(row.date) + "</td>" +
         "<td class=\"num\">" + esc(row.amount) + "</td>" +
         "<td class=\"num\">" + esc(row.value) + "</td>" +
@@ -709,6 +1166,7 @@
           esc(midTrunc(row.hash, 10, 8)) + "</a></td>" +
         "</tr>";
     }).join("");
+    routesPainted = true;
   }
 
   async function loadRoutes(wallet) {
@@ -759,12 +1217,8 @@
 
   async function bootChain() {
     emptyRoutes();
-    var found = await discoverPair();
-    if (isAddr(found.token)) TOKEN = found.token;
-    if (isAddr(found.pair)) PAIR = found.pair;
     bindAddr("token", TOKEN, "token");
-    bindAddr("pair", PAIR, "address");
-
+    await tickPair();
     if (isAddr(TOKEN)) {
       var wallet = await resolveFeeWallet(TOKEN);
       if (isAddr(wallet)) FEE_WALLET = wallet;
@@ -773,9 +1227,47 @@
     await loadRoutes(FEE_WALLET);
   }
 
-  tickPrice();
-  setInterval(tickPrice, 15000);
-  bootChain();
+  /* ---------- reveal on scroll ---------- */
+
+  (function reveal() {
+    var items = document.querySelectorAll(".reveal");
+    if (reduced || !("IntersectionObserver" in window)) {
+      for (var k = 0; k < items.length; k++) items[k].classList.add("in");
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add("in");
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    for (var i = 0; i < items.length; i++) io.observe(items[i]);
+  })();
+
+  /* ---------- run ---------- */
+
+  var timers = [];
+
+  function start() {
+    tickPrice();
+    tickNetwork();
+    timers.push(setInterval(tickPrice, 15000));
+    timers.push(setInterval(tickNetwork, 60000));
+    timers.push(setInterval(tickPair, 30000));
+    bootChain();
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) {
+      tickPrice();
+      tickNetwork();
+      tickPair();
+    }
+  });
+
+  start();
 })();
 </script>
 </body>
