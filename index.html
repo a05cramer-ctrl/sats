@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="description" content="SATS. A token on Pons paired with cbBTC. The smallest unit.">
+<title>SATS</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23F7931A'/%3E%3Cg stroke='%23E28712' stroke-width='2'%3E%3Cpath d='M40 40h320M40 80h320M40 120h320M40 160h320M40 200h320M40 240h320M40 280h320M40 320h320M40 360h320'/%3E%3Cpath d='M40 40v320M80 40v320M120 40v320M160 40v320M200 40v320M240 40v320M280 40v320M320 40v320M360 40v320'/%3E%3C/g%3E%3Crect x='136' y='136' width='128' height='128' fill='%23000'/%3E%3C/svg%3E">
+<meta property="og:title" content="SATS">
+<meta property="og:description" content="The smallest unit, now on Robinhood. Paired with cbBTC.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@SatsOnRH">
+<style>
+  :root {
+    --bg: #0A0A0A;
+    --panel: #0E0E0E;
+    --ink: #FFFFFF;
+    --mute: #8A8A8A;
+    --label: #6A6A6A;
+    --accent: #F7931A;
+    --line: #1E1E1E;
+    --up: #4CAF64;
+    --down: #E0523C;
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 400;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  h1, h2, p { margin: 0; }
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .label {
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--label);
+  }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--accent);
+  }
+  .bar {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .wordmark {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ticker {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 11.5px;
+    color: var(--mute);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ticker b { color: var(--ink); font-weight: 400; }
+  .ticker .sats { color: var(--accent); }
+
+  /* ---------- sections ---------- */
+  .band { padding: 40px 0; }
+  .band + .band > .wrap { border-top: 1px solid var(--line); }
+  .band + .band { padding-top: 0; }
+  .band + .band > .wrap > .inner { padding-top: 40px; }
+
+  /* ---------- hero ---------- */
+  .hero-line {
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    word-break: break-word;
+  }
+  .hero-line .n { color: var(--accent); }
+  .hero-line.fail {
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+    color: var(--mute);
+  }
+
+  .strip {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border: 1px solid var(--line);
+  }
+  .cell {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    min-width: 0;
+  }
+  .cell:nth-child(2n) { border-right: 0; }
+  .cell:nth-last-child(-n+2) { border-bottom: 0; }
+  .cell .v {
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 17px;
+    line-height: 1.2;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .v.up { color: var(--up); }
+  .v.down { color: var(--down); }
+
+  /* ---------- two column bands ---------- */
+  .cols { display: grid; gap: 32px; }
+  .mech p {
+    font-size: 17px;
+    line-height: 1.7;
+    max-width: 30em;
+  }
+  .mech p + p { margin-top: 12px; }
+
+  .panel {
+    border: 1px solid var(--line);
+    padding: 20px;
+  }
+  .panel-title { margin-bottom: 14px; }
+
+  .addr-row + .addr-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .addr-row .k { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--label); }
+  .addr-line {
+    margin-top: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    min-width: 0;
+  }
+  .addr-line .a { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .addr-line .a.empty { color: var(--mute); }
+  .addr-acts { margin-left: auto; display: flex; gap: 12px; white-space: nowrap; }
+  .addr-acts button, .addr-acts a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  .addr-acts button:hover { color: var(--ink); }
+  .addr-acts [hidden] { display: none; }
+
+  /* ---------- ledger ---------- */
+  .note { color: var(--mute); margin-bottom: 16px; max-width: 60em; }
+  .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    min-width: 620px;
+  }
+  thead th {
+    text-align: left;
+    padding: 11px 16px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--label);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 16px;
+    color: var(--ink);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:nth-child(odd) td { background: var(--panel); }
+  .num { text-align: right; }
+  td.num, th.num { text-align: right; }
+  .empty td {
+    color: var(--mute);
+    white-space: normal;
+    text-align: left;
+  }
+
+  /* ---------- receipt ---------- */
+  .prose { font-size: 15px; line-height: 1.7; max-width: 34em; }
+  .quote {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .quote .who { color: var(--ink); }
+  .quote .when { color: var(--mute); }
+  .quote .said { margin-top: 14px; color: var(--accent); }
+  .quote .src { margin-top: 14px; color: var(--mute); font-size: 11.5px; }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); }
+  footer .inner { padding: 40px 0; }
+  footer p { font-size: 12px; color: var(--mute); }
+
+  @media (min-width: 800px) {
+    .band { padding: 64px 0; }
+    .band + .band { padding-top: 0; }
+    .band + .band > .wrap > .inner { padding-top: 64px; }
+    .hero-line { font-size: 84px; }
+    .hero-line.fail { font-size: 40px; }
+    .strip { grid-template-columns: repeat(4, 1fr); margin-top: 36px; }
+    .cell { border-bottom: 0; padding: 16px 20px; }
+    .cell:nth-child(2n) { border-right: 1px solid var(--line); }
+    .cell:last-child { border-right: 0; }
+    .cols { grid-template-columns: 60fr 40fr; gap: 48px; }
+    .cols.even { grid-template-columns: 1fr 1fr; }
+    table { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <div class="wordmark">SATS</div>
+      <div class="ticker" id="ticker" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="band">
+      <div class="wrap">
+        <div class="inner">
+          <h1 class="hero-line" id="hero" aria-live="polite"></h1>
+          <div class="strip">
+            <div class="cell">
+              <div class="label">BTC / USD</div>
+              <div class="v" id="s-btc">—</div>
+            </div>
+            <div class="cell">
+              <div class="label">24H</div>
+              <div class="v" id="s-24h">—</div>
+            </div>
+            <div class="cell">
+              <div class="label">1 sat</div>
+              <div class="v" id="s-sat">—</div>
+            </div>
+            <div class="cell">
+              <div class="label">Sats per dollar</div>
+              <div class="v" id="s-per">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="inner cols">
+          <div class="mech">
+            <p>SATS is a token on Pons paired with cbBTC.</p>
+            <p>Creator fees on the pair are withdrawn in cbBTC.</p>
+            <p>There are no deposits. The contract holds nothing of yours.</p>
+          </div>
+          <div class="panel">
+            <div class="label panel-title">Contracts</div>
+            <div class="addr-row" id="row-token">
+              <div class="k">Token</div>
+              <div class="addr-line">
+                <span class="a empty" id="a-token">—</span>
+                <span class="addr-acts">
+                  <button type="button" id="c-token" hidden>copy</button>
+                  <a id="l-token" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
+                </span>
+              </div>
+            </div>
+            <div class="addr-row" id="row-pair">
+              <div class="k">Pair</div>
+              <div class="addr-line">
+                <span class="a empty" id="a-pair">—</span>
+                <span class="addr-acts">
+                  <button type="button" id="c-pair" hidden>copy</button>
+                  <a id="l-pair" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
+                </span>
+              </div>
+            </div>
+            <div class="addr-row" id="row-fee">
+              <div class="k">Creator fee</div>
+              <div class="addr-line">
+                <span class="a empty" id="a-fee">—</span>
+                <span class="addr-acts">
+                  <button type="button" id="c-fee" hidden>copy</button>
+                  <a id="l-fee" rel="noopener noreferrer" target="_blank" hidden>explorer</a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="inner">
+          <div class="label" style="margin-bottom:16px">Fee routing</div>
+          <p class="note">Creator fees on the SATS/cbBTC pair are withdrawn in cbBTC. Every withdrawal appears below.</p>
+          <div class="scroller">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th class="num">Amount cbBTC</th>
+                  <th class="num">Value at routing</th>
+                  <th>Transaction</th>
+                </tr>
+              </thead>
+              <tbody id="routes">
+                <tr class="empty"><td colspan="4">no routings yet — this table is read from chain</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="inner cols even">
+          <div>
+            <div class="label" style="margin-bottom:16px">Receipt</div>
+            <p class="prose">
+              The smallest unit of bitcoin has no official name. On 10 February 2011 a
+              <a href="https://bitcointalk.org/index.php?topic=369.0" rel="noopener noreferrer" target="_blank">bitcointalk</a>
+              user called ribuck suggested two nicknames for it in a thread titled
+              <a href="https://bitcointalk.org/index.php?topic=3311.0" rel="noopener noreferrer" target="_blank">More divisibility required - move the decimal point</a>:
+              austrian, and satoshi.
+            </p>
+          </div>
+          <div class="quote">
+            <div class="who">ribuck</div>
+            <div class="when">10 February 2011</div>
+            <div class="said">"I like 'austrian' and 'satoshi' as possible nicknames"</div>
+            <div class="src">bitcointalk.org — thread 3311</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="inner">
+        <p>meme coin, no utility, not financial advice, not affiliated with Coinbase or with Bitcoin.</p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var TOKEN = (function () {
+    var q = new URLSearchParams(location.search).get("token") || "";
+    return /^0x[a-fA-F0-9]{40}$/.test(q) ? q : "";
+  })();
+  var PAIR = "";
+  var FEE_WALLET = "";
+  var CBBTC = "0xCEC185eB182c47d1bA1EFc84e6959e18cd620Be4";
+  var FACTORY = "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e";
+  var EXPLORER = "https://robinhoodchain.blockscout.com";
+  var TOPIC_LAUNCHED = "0x8d4aad4953d0ca700d468f3753aa14432d1b35b43ec6409f051fb6aa43a89607";
+  var TOPIC_RECIPIENT = "0x308c390ed1ab5873392818e036cabdf408bc8ad042fbaead3108954ff75ba980";
+  var DASH = "\u2014";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var hero = $("hero");
+  var ticker = $("ticker");
+  var routes = $("routes");
+
+  function isAddr(a) { return /^0x[a-fA-F0-9]{40}$/.test(a || ""); }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function midTrunc(h, head, tail) {
+    if (!h) return DASH;
+    if (h.length <= head + tail + 1) return h;
+    return h.slice(0, head) + "\u2026" + h.slice(-tail);
+  }
+
+  function topicAddr(topic) {
+    if (!topic) return "";
+    return ("0x" + String(topic).replace(/^0x/i, "").slice(-40)).toLowerCase();
+  }
+
+  function padTopic(addr) {
+    return "0x" + addr.replace(/^0x/i, "").toLowerCase().padStart(64, "0");
+  }
+
+  async function getJson(url) {
+    var ctl = new AbortController();
+    var t = setTimeout(function () { ctl.abort(); }, 10000);
+    try {
+      var res = await fetch(url, { signal: ctl.signal, headers: { Accept: "application/json" } });
+      if (!res.ok) throw new Error(String(res.status));
+      return await res.json();
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  function posNum(v) {
+    var n = typeof v === "number" ? v : parseFloat(v);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function anyNum(v) {
+    var n = typeof v === "number" ? v : parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  /* ---------- price ---------- */
+
+  async function fetchMarket() {
+    var sources = [
+      {
+        url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+        read: function (d) {
+          var b = d && d.bitcoin;
+          return b ? { price: posNum(b.usd), change: anyNum(b.usd_24h_change) } : null;
+        }
+      },
+      {
+        url: "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
+        read: function (d) {
+          return d ? { price: posNum(d.lastPrice), change: anyNum(d.priceChangePercent) } : null;
+        }
+      },
+      {
+        url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+        read: function (d) {
+          return d && d.data ? { price: posNum(d.data.amount), change: null } : null;
+        }
+      }
+    ];
+    for (var i = 0; i < sources.length; i++) {
+      try {
+        var got = sources[i].read(await getJson(sources[i].url));
+        if (got && got.price) return got;
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function fmtUsd(n) {
+    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function setCell(id, text, cls) {
+    var el = $(id);
+    if (!el) return;
+    el.className = "v" + (cls ? " " + cls : "");
+    el.textContent = text;
+  }
+
+  function showUnavailable() {
+    hero.className = "hero-line fail";
+    hero.textContent = "price feed unavailable";
+    ticker.textContent = "price feed unavailable";
+    setCell("s-btc", DASH);
+    setCell("s-24h", DASH);
+    setCell("s-sat", DASH);
+    setCell("s-per", DASH);
+  }
+
+  function renderMarket(m) {
+    var sats = Math.round(100000000 / m.price);
+    var satUsd = m.price / 100000000;
+    var satsText = sats.toLocaleString("en-US");
+
+    hero.className = "hero-line";
+    hero.innerHTML = "$1 = <span class=\"n\">" + esc(satsText) + "</span> sats";
+
+    ticker.innerHTML =
+      "BTC <b>$" + esc(fmtUsd(m.price)) + "</b>" +
+      " \u00b7 $1 = <b class=\"sats\">" + esc(satsText) + "</b> sats";
+
+    setCell("s-btc", "$" + fmtUsd(m.price));
+    if (m.change == null) {
+      setCell("s-24h", DASH);
+    } else {
+      setCell(
+        "s-24h",
+        (m.change > 0 ? "+" : m.change < 0 ? "\u2212" : "") +
+          Math.abs(m.change).toFixed(2) + "%",
+        m.change > 0 ? "up" : m.change < 0 ? "down" : ""
+      );
+    }
+    setCell("s-sat", "$" + satUsd.toFixed(8));
+    setCell("s-per", satsText);
+  }
+
+  async function tickPrice() {
+    try {
+      var m = await fetchMarket();
+      if (!m) throw new Error("unavailable");
+      renderMarket(m);
+    } catch (e) {
+      showUnavailable();
+    }
+  }
+
+  /* ---------- addresses ---------- */
+
+  function bindAddr(key, address, path) {
+    var span = $("a-" + key);
+    var btn = $("c-" + key);
+    var link = $("l-" + key);
+    if (!isAddr(address)) {
+      span.className = "a empty";
+      span.textContent = DASH;
+      btn.hidden = true;
+      link.hidden = true;
+      return;
+    }
+    span.className = "a";
+    span.textContent = midTrunc(address, 10, 8);
+    span.title = address;
+    link.hidden = false;
+    link.href = EXPLORER + "/" + path + "/" + address;
+    btn.hidden = false;
+    btn.onclick = function () {
+      navigator.clipboard.writeText(address).then(function () {
+        btn.textContent = "copied";
+        setTimeout(function () { btn.textContent = "copy"; }, 1200);
+      }).catch(function () {});
+    };
+  }
+
+  async function discoverPair() {
+    try {
+      var data = await getJson("https://api.dexscreener.com/latest/dex/search?q=SATS%20cbBTC");
+      var pairs = data && Array.isArray(data.pairs) ? data.pairs : [];
+      var hits = pairs.filter(function (p) {
+        var base = p.baseToken || {};
+        var quote = p.quoteToken || {};
+        return p.chainId === "robinhood" &&
+          String(base.symbol || "").toUpperCase() === "SATS" &&
+          String(quote.address || "").toLowerCase() === CBBTC.toLowerCase() &&
+          (!TOKEN || String(base.address || "").toLowerCase() === TOKEN.toLowerCase());
+      });
+      if (hits.length) {
+        hits.sort(function (a, b) { return (b.pairCreatedAt || 0) - (a.pairCreatedAt || 0); });
+        return { token: hits[0].baseToken.address, pair: hits[0].pairAddress || "" };
+      }
+    } catch (e) {}
+    return { token: TOKEN, pair: "" };
+  }
+
+  async function getLogs(topic0, topic1) {
+    var url = EXPLORER +
+      "/api?module=logs&action=getLogs" +
+      "&fromBlock=0&toBlock=latest" +
+      "&address=" + FACTORY +
+      "&topic0=" + topic0 +
+      "&topic1=" + topic1 +
+      "&topic0_1_opr=and";
+    var data = await getJson(url);
+    var result = data && data.result;
+    return Array.isArray(result) ? result : [];
+  }
+
+  async function resolveFeeWallet(token) {
+    var topic1 = padTopic(token);
+    var wallet = "";
+    try {
+      var launched = await getLogs(TOPIC_LAUNCHED, topic1);
+      if (launched.length) {
+        var last = launched[launched.length - 1];
+        wallet = topicAddr((last.topics || [])[3]);
+        var data = String(last.data || "").replace(/^0x/i, "");
+        var pairToken = topicAddr("0x" + data.slice(0, 64));
+        if (pairToken && pairToken !== CBBTC.toLowerCase()) wallet = "";
+      }
+    } catch (e) {}
+    try {
+      var updates = await getLogs(TOPIC_RECIPIENT, topic1);
+      if (updates.length) {
+        var next = topicAddr((updates[updates.length - 1].topics || [])[3]);
+        if (isAddr(next)) wallet = next;
+      }
+    } catch (e) {}
+    return isAddr(wallet) ? wallet : "";
+  }
+
+  /* ---------- ledger ---------- */
+
+  function emptyRoutes() {
+    routes.innerHTML =
+      "<tr class=\"empty\"><td colspan=\"4\">no routings yet \u2014 this table is read from chain</td></tr>";
+  }
+
+  function fmtDate(iso) {
+    var t = Date.parse(iso);
+    if (!Number.isFinite(t)) return "";
+    var d = new Date(t);
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return String(d.getUTCDate()).padStart(2, "0") + " " + months[d.getUTCMonth()] + " " + d.getUTCFullYear();
+  }
+
+  function unitsFrom(value, decimals) {
+    var d = Number(decimals);
+    if (!Number.isFinite(d) || d < 0 || d > 36) d = 8;
+    var raw = String(value || "");
+    if (!/^\d+$/.test(raw)) return null;
+    raw = raw.replace(/^0+(?=\d)/, "") || "0";
+    var pad = raw.padStart(d + 1, "0");
+    var whole = pad.slice(0, pad.length - d);
+    var frac = pad.slice(pad.length - d).replace(/0+$/, "");
+    return {
+      text: frac ? whole + "." + frac : whole,
+      value: Number(whole + "." + (pad.slice(pad.length - d) || "0"))
+    };
+  }
+
+  function addrOf(x) {
+    if (!x) return "";
+    if (typeof x === "string") return x.toLowerCase();
+    if (typeof x.hash === "string") return x.hash.toLowerCase();
+    return "";
+  }
+
+  var histCache = {};
+
+  async function btcOn(iso) {
+    var t = Date.parse(iso);
+    if (!Number.isFinite(t)) return null;
+    var d = new Date(t);
+    var key = String(d.getUTCDate()).padStart(2, "0") + "-" +
+      String(d.getUTCMonth() + 1).padStart(2, "0") + "-" + d.getUTCFullYear();
+    if (key in histCache) return histCache[key];
+    var price = null;
+    try {
+      var data = await getJson("https://api.coingecko.com/api/v3/coins/bitcoin/history?date=" + key + "&localization=false");
+      price = posNum(data && data.market_data && data.market_data.current_price && data.market_data.current_price.usd);
+    } catch (e) {}
+    histCache[key] = price;
+    return price;
+  }
+
+  function renderRoutes(rows) {
+    if (!rows.length) { emptyRoutes(); return; }
+    routes.innerHTML = rows.map(function (row) {
+      var href = EXPLORER + "/tx/" + row.hash;
+      return "<tr>" +
+        "<td>" + esc(row.date) + "</td>" +
+        "<td class=\"num\">" + esc(row.amount) + "</td>" +
+        "<td class=\"num\">" + esc(row.value) + "</td>" +
+        "<td><a href=\"" + esc(href) + "\" rel=\"noopener noreferrer\" target=\"_blank\">" +
+          esc(midTrunc(row.hash, 10, 8)) + "</a></td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  async function loadRoutes(wallet) {
+    if (!isAddr(wallet)) { emptyRoutes(); return; }
+    var url = EXPLORER + "/api/v2/addresses/" + wallet + "/token-transfers?filter=from";
+    try {
+      var data = await getJson(url);
+      var items = data && Array.isArray(data.items) ? data.items : [];
+      var rows = [];
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var token = it.token || {};
+        var tokenAddr = String(token.address_hash || token.address || "").toLowerCase();
+        if (tokenAddr && tokenAddr !== CBBTC.toLowerCase()) continue;
+        if (addrOf(it.from) !== wallet.toLowerCase()) continue;
+        var hash = it.transaction_hash || it.tx_hash || it.hash;
+        var total = it.total || {};
+        var amount = unitsFrom(
+          total.value,
+          total.decimals != null ? total.decimals : token.decimals
+        );
+        var date = fmtDate(it.timestamp);
+        if (!hash || !amount || !date) continue;
+        rows.push({
+          date: date,
+          amount: amount.text,
+          units: amount.value,
+          iso: it.timestamp,
+          value: DASH,
+          hash: hash,
+          ts: Date.parse(it.timestamp) || 0
+        });
+      }
+      rows.sort(function (a, b) { return b.ts - a.ts; });
+      renderRoutes(rows);
+
+      for (var j = 0; j < rows.length; j++) {
+        var px = await btcOn(rows[j].iso);
+        if (px && Number.isFinite(rows[j].units)) {
+          rows[j].value = "$" + fmtUsd(rows[j].units * px);
+        }
+      }
+      renderRoutes(rows);
+    } catch (e) {
+      emptyRoutes();
+    }
+  }
+
+  async function bootChain() {
+    emptyRoutes();
+    var found = await discoverPair();
+    if (isAddr(found.token)) TOKEN = found.token;
+    if (isAddr(found.pair)) PAIR = found.pair;
+    bindAddr("token", TOKEN, "token");
+    bindAddr("pair", PAIR, "address");
+
+    if (isAddr(TOKEN)) {
+      var wallet = await resolveFeeWallet(TOKEN);
+      if (isAddr(wallet)) FEE_WALLET = wallet;
+    }
+    bindAddr("fee", FEE_WALLET, "address");
+    await loadRoutes(FEE_WALLET);
+  }
+
+  tickPrice();
+  setInterval(tickPrice, 15000);
+  bootChain();
+})();
+</script>
+</body>
+</html>
